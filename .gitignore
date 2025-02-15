@@ -1,0 +1,3 @@
+secure/
+*.db
+node_modules/ 

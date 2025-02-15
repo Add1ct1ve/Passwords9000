@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="shortcut icon" type="image/png" href="favicon.png">
+    <title>Password Originality Meter 🔐✨</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* === CSS Styles with cooler effects === */
+        :root {
+            --primary-color: #4CAF50;     /* Bamboo green */
+            --primary-dark: #2E7D32;      /* Darker bamboo */
+            --gradient-bg: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            --neon-shadow: 0 0 10px #4CAF50, 0 0 20px #2E7D32, 0 0 30px #1B5E20;
+            --panda-black: #333;
+            --panda-white: #fff;
+            --bg-dark: #1a2419;           /* Dark forest background */
+            --bg-light: #243021;          /* Lighter forest background */
+            --accent-green: #81C784;      /* Light bamboo accent */
+        }
+
+        body { 
+            font-family: 'Comic Neue', cursive; 
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(45deg, var(--bg-dark), var(--bg-light));
+            color: white;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .meme-box {
+            border: 3px solid var(--primary-color);
+            padding: 30px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meme-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: var(--neon-shadow);
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: var(--neon-shadow); }
+            to { text-shadow: 0 0 15px #4CAF50, 0 0 25px #2E7D32, 0 0 35px #1B5E20; }
+        }
+
+        #leaderboard {
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(76, 175, 80, 0.1);  /* Transparent bamboo green */
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            position: relative;
+        }
+
+        #leaderboard h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        input, button {
+            font-family: inherit;
+            padding: 15px 20px;
+            margin: 5px;
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            width: 100%;
+            max-width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 15px var(--primary-color);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        button {
+            background: var(--gradient-bg);
+            color: white;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        #result {
+            margin-top: 20px;
+            color: var(--primary-color);
+            font-weight: bold;
+            min-height: 24px;
+            text-align: center;
+            font-size: 1.2em;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .error {
+            color: #ff6b6b;  /* Softer red that matches the theme better */
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .success {
+            color: var(--accent-green);
+            animation: bounce 0.5s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        #scores {
+            list-style-position: inside;
+            padding: 0;
+        }
+
+        #scores li {
+            padding: 12px 20px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+            cursor: default;
+        }
+
+        #scores li:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Responsive design */
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .meme-box, #leaderboard {
+                padding: 20px;
+            }
+        }
+
+        /* Panda styles */
+        .panda {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            position: relative;
+            transform: scale(0.8);
+        }
+
+        .ears {
+            position: relative;
+            width: 100%;
+            height: 50px;
+        }
+
+        .ear {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: var(--panda-black);
+            border-radius: 50%;
+        }
+
+        .ear.left {
+            left: 40px;
+        }
+
+        .ear.right {
+            right: 40px;
+        }
+
+        .face {
+            width: 160px;
+            height: 160px;
+            background: var(--panda-white);
+            border: 8px solid var(--panda-black);
+            margin: -20px auto 0;
+            border-radius: 50%;
+            position: relative;
+            z-index: 1;
+        }
+
+        .eyes {
+            position: relative;
+            top: 45px;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .eye {
+            width: 35px;
+            height: 35px;
+            background: var(--panda-black);
+            border-radius: 50%;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .eye .shine {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+        }
+
+        .nose {
+            width: 20px;
+            height: 15px;
+            background: var(--panda-black);
+            border-radius: 20px;
+            position: absolute;
+            top: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .mouth {
+            width: 40px;
+            height: 20px;
+            border: 4px solid var(--panda-black);
+            border-radius: 0 0 20px 20px;
+            border-top: 0;
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+        }
+
+        /* Panda peek animation */
+        .password-peek .eye {
+            height: 5px;
+            margin-top: 15px;
+            transform: rotate(0deg) !important; /* Force eyes to be straight when closed */
+        }
+
+        .password-peek .mouth {
+            height: 5px;
+            width: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- === Main Form === -->
+    <div class="meme-box">
+        <h1>Password Originality Checker 9000</h1>
+        <div class="panda">
+            <div class="ears">
+                <div class="ear left"></div>
+                <div class="ear right"></div>
+            </div>
+            <div class="face">
+                <div class="eyes">
+                    <div class="eye left">
+                        <div class="shine"></div>
+                    </div>
+                    <div class="eye right">
+                        <div class="shine"></div>
+                    </div>
+                </div>
+                <div class="nose"></div>
+                <div class="mouth"></div>
+            </div>
+        </div>
+        <form id="registerForm" class="form-group">
+            <input 
+                id="usernameInput" 
+                type="text" 
+                placeholder="Enter your username" 
+                maxlength="50"
+                required
+                autocomplete="off"
+            >
+            <input 
+                id="passwordInput" 
+                type="password" 
+                placeholder="Enter your unique password" 
+                required
+            >
+            <button type="submit">Check My Originality 🐼</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <!-- === Leaderboard === -->
+    <div id="leaderboard">
+        <h2>🏆 Password Hall of Fame 🏆</h2>
+        <ol id="scores"></ol>
+    </div>
+
+    <!-- === JavaScript Code === -->
+    <script>
+        // Constants
+        const API_ENDPOINTS = {
+            REGISTER: '/register',
+            LEADERBOARD: '/leaderboard'
+        };
+
+        // DOM Elements
+        const elements = {
+            form: document.getElementById('registerForm'),
+            result: document.getElementById('result'),
+            username: document.getElementById('usernameInput'),
+            password: document.getElementById('passwordInput'),
+            scores: document.getElementById('scores')
+        };
+
+        // Utility functions
+        const displayMessage = (message, isError = false) => {
+            elements.result.className = isError ? 'error' : 'success';
+            elements.result.textContent = message;
+        };
+
+        const clearForm = () => {
+            elements.username.value = '';
+            elements.password.value = '';
+        };
+
+        // API calls
+        async function registerUser(username, password) {
+            const response = await fetch(API_ENDPOINTS.REGISTER, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        }
+
+        async function fetchLeaderboard() {
+            const response = await fetch(API_ENDPOINTS.LEADERBOARD);
+            if (!response.ok) throw new Error('Failed to fetch leaderboard');
+            return response.json();
+        }
+
+        // Event handlers
+        elements.form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = elements.username.value.trim();
+            const password = elements.password.value.trim();
+
+            try {
+                const data = await registerUser(username, password);
+                
+                if (data.success) {
+                    displayMessage(data.message || "🎉 Congratulations! You're a password pioneer!");
+                    clearForm();
+                    updateLeaderboard();
+                } else {
+                    displayMessage(data.message || "Something went wrong!", true);
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                displayMessage("🚨 Server connection failed! Try again later.", true);
+            }
+        });
+
+        // Update leaderboard
+        async function updateLeaderboard() {
+            try {
+                const scores = await fetchLeaderboard();
+                elements.scores.innerHTML = scores
+                    .map(user => `<li>${user.username} - ${user.count} unique password${user.count === 1 ? '' : 's'}</li>`)
+                    .join('');
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                elements.scores.innerHTML = '<li class="error">Failed to load leaderboard 😢</li>';
+            }
+        }
+
+        // Initial load
+        updateLeaderboard();
+
+        // Panda animation
+        const passwordInput = document.getElementById('passwordInput');
+        const panda = document.querySelector('.panda');
+        let eyeTrackingEnabled = true;
+
+        passwordInput.addEventListener('focus', () => {
+            panda.classList.add('password-peek');
+            eyeTrackingEnabled = false;
+            // Reset eye rotation when closing
+            const eyes = document.querySelectorAll('.eye');
+            eyes.forEach(eye => {
+                eye.style.transform = 'rotate(0deg)';
+            });
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            panda.classList.remove('password-peek');
+            eyeTrackingEnabled = true;   // Re-enable eye tracking when password field is blurred
+        });
+
+        // Make panda's eyes follow mouse movement only when not peeking
+        document.addEventListener('mousemove', (e) => {
+            if (!eyeTrackingEnabled) return;  // Skip eye movement if tracking is disabled
+            
+            const eyes = document.querySelectorAll('.eye');
+            eyes.forEach(eye => {
+                const rect = eye.getBoundingClientRect();
+                const x = (rect.left + rect.width / 2);
+                const y = (rect.top + rect.height / 2);
+                const rad = Math.atan2(e.pageX - x, e.pageY - y);
+                const rot = (rad * (180 / Math.PI) * -1) + 180;
+                eye.style.transform = `rotate(${rot}deg)`;
+            });
+        });
+    </script>
+</body>
+</html>
